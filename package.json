@@ -1,0 +1,25 @@
+{
+  "name": "dns-updater-freenom",
+  "version": "0.0.1",
+  "description": "Module to automatically check the public IP and update the DNS information",
+  "license": "MIT",
+  "keywords": [
+    "dns",
+    "update",
+    "freenom"
+  ],
+  "author": {
+    "name": "@metbosch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/metbosch/dns-updater-freenom.git"
+  },
+  "dependencies": {
+    "async": "^2.1.4",
+    "config": "^1.24.0",
+    "freenom-dns": "^0.9.0",
+    "logops": "^1.0.7",
+    "network": "^0.3.0"
+  }
+}
