@@ -3,11 +3,12 @@
     "email" : "yourFreenomEmail@something",
     "password" : "yourFreenomPassword",
     "max_retries" : "5",
-    "retry_interval" : "2000",
+    "retry_interval" : "5000",
     "ttl" : "300"
   },
   "domains" : {
     "wlan0" : "domain1.com",
     "eth0" : "domain2.com"
-  }
+  },
+  "period" : "5"
 }

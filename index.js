@@ -2,9 +2,13 @@ const async   = require('async'),
       config  = require('config'),
       Freenom = require('freenom-dns'),
       network = require('network'),
+      sched   = require('node-schedule'),
       logger  = require('logops');
 
 const freenom = Freenom.init(config.get('freenom.email'), config.get('freenom.password'));
+const jobPeriod = parseInt(config.get('period'));
+
+var lastFinished = true;
 
 // pubIPs['iface.name'] = public_ip
 var pubIPs = {};
@@ -28,6 +32,15 @@ function updateDnsRecord(domain, ip, callback) {
 
 function checkCurrentIP() {
   var iface0, pubIP;
+  logger.info("Starting the IP checking.");
+
+  // Check if the last execution finished
+  if (!lastFinished) {
+    logger.warn("Last scheduled job have not finished yet. Aborting this execution.");
+    return;
+  }
+
+  lastFinished = false;
   async.waterfall([
     network.get_active_interface,
     (iface, callback) => {
@@ -44,12 +57,16 @@ function checkCurrentIP() {
     if (err0) {
       //Something went wrong getting the info
       logger.warn("Error checking the public IP. " + err0.message);
+
+      lastFinished = true;
     } else if (!compareInterfaces(iface0, iface1)) {
       //The initial and final used interfaces don't match
 
       logger.warn("The initial an final used interface don't match");
       logger.warn(iface0);
       logger.warn(iface1);
+
+      lastFinished = true;
     } else if (!pubIPs[iface1.name] || pubIPs[iface1.name] !== pubIP) {
       //The public IP changed or we don't know the DNS record
 
@@ -58,20 +75,30 @@ function checkCurrentIP() {
         var domain = config.get('domains.' + iface1.name);
         updateDnsRecord(domain, pubIP, (err1) => {
           if (err1) {
-            logger.error("Error updating the DNS record of domain " + domain + ". " + err1.message);
+            logger.error("Error updating the DNS record of domain " + domain + ". " + err1);
           } else {
             pubIPs[iface1.name] = pubIP;
           }
+          lastFinished = true;
         });
       } else {
         logger.error("Cannot find the domain of interface " + iface1.name + ". It has to appear in the domains section of configuration file.");
+
+        lastFinished = true;
       }
     } else {
       //The public IP didn't change
       logger.info("Public IP of interface " + iface1.name + " doesn't change");
+
+      lastFinished = true;
     }
   });
 };
 
+// Check is period value is a number
+if (isNaN(jobPeriod)) throw "The period must be an integer value in minutes";
 
-checkCurrentIP();
+var rule = new sched.RecurrenceRule();
+rule.minute = new sched.Range(0, 59, jobPeriod);
+sched.scheduleJob(rule, checkCurrentIP);
+logger.info("Job successfully scheduled every " + jobPeriod + " minutes.");
