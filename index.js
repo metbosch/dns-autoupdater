@@ -1,3 +1,5 @@
+process.chdir(__dirname);
+
 const async   = require('async'),
       config  = require('config'),
       Freenom = require('freenom-dns'),
