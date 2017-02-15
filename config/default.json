@@ -10,5 +10,6 @@
     "wlan0" : "domain1.com",
     "eth0" : "domain2.com"
   },
-  "period" : "5"
+  "period" : "5",
+  "logger" : "console"
 }

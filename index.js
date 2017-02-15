@@ -2,11 +2,21 @@ const async   = require('async'),
       config  = require('config'),
       Freenom = require('freenom-dns'),
       network = require('network'),
-      sched   = require('node-schedule'),
-      logger  = require('logops');
+      sched   = require('node-schedule');
 
 const freenom = Freenom.init(config.get('freenom.email'), config.get('freenom.password'));
 const jobPeriod = parseInt(config.get('period'));
+
+if (config.get('logger') === 'winevents') {
+  try {
+    var logger = new require('node-windows').EventLogger('dns-autoupdater');
+  } catch (err) {
+    var logger = require('logops');
+    logger.warn('Your configuration required the use of Windows Logging but the module is not available');
+  }
+} else {
+  var logger = require('logops');
+}
 
 var lastFinished = true;
 
