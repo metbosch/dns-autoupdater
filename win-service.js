@@ -9,8 +9,8 @@ console.log('Running on directory: ' + dirIndex);
 
 var svc = new Service({
   name: 'DNS Autoupdater',
-  description 'NodeJS script that automatically updates the DNS record with the computer public IP',
-  script: indexJS,var Service = require('node-windows').Service;
+  description: 'NodeJS script that automatically updates the DNS record with the computer public IP',
+  script: indexJS
 });
 
 svc.on('install', () => {
